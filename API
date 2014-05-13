@@ -1,0 +1,130 @@
+class lexer{
+  bool addTokenDef(tokenDef , ID);
+  vector<TokenDef> tds;
+  void init();
+  unique_ptr map;
+}
+
+class TokenDef {
+  TokenDef(str, ID);	////str can be "a string" or "[a-z]" or "[^b-f]"
+  operaotr||(tokenDef);
+  operaotr>>(tokenDef);
+  operaotr*();//0 or more
+  operaotr+();//1 or more
+  operaotr-();//0 or 1
+}
+
+map:
+state0[0-127] means start, never other state goes back to it
+state1, ..., stateN, N means the probable max length of str
+state[0] means without reading a char the state can move itself
+|| causes other state shift on original state
+>> causes another state shift on final state
++-* causes final state shift back to original state
+
+but, note! *+- needs its own map rows, which not be shared, to avoid mixing between them
+for example, (abc)* and (cba)* if share the same 3 rows, then, will cbaabc or abccba be recognized?
+
+state  a-zA-Z 0-9 _ ,.+-/*  \t\n... " '  ,  ;
+0	1     2   1   4    0	   7  8  6  6	
+1 //id  1	1 1   0	    0	   0  0
+2 //num 0    2    0   0	    0 	   0  0
+3 //str 0.....................................
+4 //op  0     0   0   4    0	   0
+5 //str 0.....................................
+6 //pun 0............
+7 //tem 7............		   3  7
+8 //tem 8............                 0
+
+function parse(rule r)
+  offset start = 0;	offset end = se.size();
+  Production pd = r.transform(r.parse(start, end, se));
+  
+r.parse(offset& start, const offset, const std::vector<Token>&)
+  offset cs = start;
+  pds = r.expr(start, end, se);
+  if(start == cs) return false
+  Production pd = transform(pds);
+
+  typedef function<bool(start, end, vector<token>)> eval;
+  
+  eval _LinkRule::compile( out_eval ){
+    for(i = size-1; i >0; --i)
+	r.compile(out_eval);
+      out_eval = [](){	
+	if(r.eval(start, end, npd))
+	  pd->result.push_back(npd);
+	  return true;
+	return false;
+      }
+    r = at(0);
+    r.compile(out_eval);
+    out_eval = [](){	
+	pd->result = new vector();
+	if(r.eval(start, end, npd))
+	if(out_eval(start, end, pd))
+	  pd->result.push_back(npd);
+	  return true;
+	return false;
+    }
+    return out_eval;
+  }
+  
+  eval _KneeRule::compile( out_eval ){
+    eval ev = [](){
+    if(pd->result == null)
+      pd->result = new vector;
+    if(r.eval(start, end, npd){
+      if(ev(start, end, pd)){
+	pd->result.push_back(npd);
+	return true;
+      }
+      reset start; 
+    }
+    if(out_eval(start, end, null))
+      return true;
+    };
+    return ev;
+  }
+  
+  eval _OptionRule::compile( out_eval )
+  {
+    eval ev =  [](){
+      if(r1.eval(start, end, pd) && out_eval(start, end, null) ) return true;
+      if(r2.eval(start, end, pd)) return true;
+      return false;
+    };
+    return ev;
+  }
+  
+  *eval(start, end, pd):	//out_eval is ref outside of fun
+    if(pd->result == null)
+      pd->result = new vector;
+    eval ev = [](){
+      if(eval(start, end, pd) && out_eval(null)) return true;
+    }
+    if(r.eval(start, end, npd){
+      if(ev(start, end, pd)){
+	pd->result.push_back(npd);
+	return true;
+      }
+    }
+    else
+    reset start; 
+    if(out_eval(start, end, null))
+      return true;
+    
+  >>eval(start, end, pd):	//out eval?
+    if(pd->result == null)	pd->result = new vector();
+    if(r.eval(start, end, npd))
+      if(out_eval(start, end, pd))
+	pd->result.push_back(npd);
+	return true;
+    return false;
+
+how to deal with char and chars
+
+`std::function<void (jrun::parser::production&, int)> 
+generate_transformer<jrun::generation::mapConst, std::vector<std::string, std::allocator<std::string> >, std::string>()'
+
+	
