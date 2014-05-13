@@ -97,7 +97,7 @@ namespace jrun{
     class LinkRule; class KneeRule; class OptionRule;
     class Rule {
     public:
-      Rule(){};
+      Rule() : ptr(new _Rule()){};
       Rule(_Rule* r) : ptr(r){};
       Rule(RulePtr r) : ptr(r){};
       Rule(_Rule* r, transformer tr) : ptr(r){ ptr->setTransform(tr); };
