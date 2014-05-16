@@ -29,6 +29,27 @@ transformer transformer_for_rule_Knee()
   pd.result = std::shared_ptr<void>(static_cast<void*>(ns));
   };
 }
+
+// *(a >> ".") >> a
+template <typename T, typename U>
+transformer transformer_for_rule_Knee_Separated()
+{
+  return [](production& pd, const int){
+  pdsPtr pds0 = std::static_pointer_cast<pdsType>(pd.result);
+  pdsPtr pds = std::static_pointer_cast<pdsType>((pds0->back()).result);
+  int sz = pds->size();
+  T* ns = new T(sz+1);
+  int i = 0;
+  for(auto npd : *pds)
+  {
+    (*ns)[i] = (*static_cast<U*>(npd.result.get()));
+    ++i;
+  }
+  (*ns)[sz] = (*static_cast<U*>((pds0->front()).result.get()));
+
+  pd.result = std::shared_ptr<void>(static_cast<void*>(ns));
+  };
+}
     
 template <typename T, typename U>
 transformer transformer_for_rule1()

@@ -122,9 +122,29 @@ r.parse(offset& start, const offset, const std::vector<Token>&)
 	return true;
     return false;
 
-how to deal with char and chars
+=====================================================
+why we need a _rule_wrapper, instead of using shared_ptr of _rule directly?
 
-`std::function<void (jrun::parser::production&, int)> 
-generate_transformer<jrun::generation::mapConst, std::vector<std::string, std::allocator<std::string> >, std::string>()'
+1 shared_ptr can be recognized as a ptr, simply
+2 when constructing rules, such as constructing a _LinkRule, we need a copy of , kind of, a ptr to help compile
+3 if we copy ptr(shared_ptr is the same) of _rule, the comes the question that:
+we cannot change the def content of copyed _rule in the later assignment, even the type info, because assignment just changes ptr, not content of ptr
+here is the bad example:
+  rule names; rule start = names >> names; names = rule(ID);
+when constructing rule start, it has copied ptr of names, assignment operaotr later doesn't work anymore
+unless we make operaotr= to change def content of ptr, then type of ptr must cover all situations, and type info is ambiguous
+4 so, we can add a _rule_wrapper upon ptr of _rule, and hold a ptr of _rule_wrapper inside Rule
+when constructing rule, just copy ptr of _rule_wrapper, when compiling, use ptr of _rule inside struct _rule_wrapper
+we overide operaotr=, not to change ptr of _rule_wrapper, because it cannot change real content of the copied one
+we change ptr of _rule inside struct _rule_wrapper, so every copied ptr of _rule_wrapper is influenced
+in fact, it can be put simply:
+  struct A { T* n; };
+  A a = b; //doesn't change the content of the original a.n
+  *(a.n) = *(b.n); //now it does
+  a.n->ptr = b.n->ptr; //works also
+5 finally, 
+  if we want to store const, just copy
+  if we want to store sth to be changed, just copy ptr of it, and in operaotr=, change real content of ptr
+  if we want of store (ptr of sth) to be changed, just copy ptr of (ptr of it), etc...
 
 	

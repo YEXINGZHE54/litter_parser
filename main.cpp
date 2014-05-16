@@ -6,29 +6,42 @@
 #include "grammar.hpp"
 #include "transformer.hpp"
 #include "generation.hpp"
+#include <fstream>
 
 int main(int argc, char **argv) {
-    std::string str("acm.td.pd.fs.k");
+    std::string str;  
+    std::ifstream in("data.txt", std::ios_base::in);
+    if (!in)
+    {
+        std::cerr << "Error: Could not open input file: "
+            << "data.txt" << std::endl;
+        return false;
+    }
+    in.unsetf(std::ios::skipws); // No white space skipping!
+    std::copy(
+      std::istream_iterator<char>(in),
+      std::istream_iterator<char>(),
+      std::back_inserter(str)
+    );
+  
     jrun::parser::LexerState state;
-    state.addTokenDef("[");	state.addTokenDef("]");
-    state.addTokenDef(".");
+    std::vector<const char*> chars{">", "<", "=", "-", "+", "*", "/", "!", "%", "^", "&", "(", ")", "[", "]", "{", "}", ",", ".", ";", ":"};
+    for(auto c : chars)
+      state.addTokenDef(std::string(c));
     const char* start = str.c_str();
     state.parse(start, &start[str.size()]);
     std::vector<jrun::parser::TokenPtr> tks = state.readAll();  
-    jrun::parser::TokenPtr tk = tks.back();
-    std::cout << tk->id << tk->tok << std::endl;
     jrun::parser::PDA pda(tks);
     jrun::grammar::mGrammar startRule;
+    using namespace jrun::parser;
     jrun::parser::production pd;
-    bool r = pda.parse(startRule, pd);
-    if(!r)
+    bool re = pda.parse(startRule, pd);
+    if(!re)
       std::cerr << "error parse" << std::endl;
     else
     {
-      jrun::generation::names* pds = static_cast<jrun::generation::names*>(pd.result.get());
+      std::vector<jrun::generation::mCommand>* pds = static_cast<std::vector<jrun::generation::mCommand>*>(pd.result.get());
       std::cout << pds->size() << std::endl;
-      for(auto c : *pds)
-	std::cout << c << std::endl;
     }
     return 0;
 }

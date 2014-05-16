@@ -13,7 +13,8 @@ static stateID tb[9][128] = {
 
 static void initTable()
 {
-  std::vector<unsigned char> chars{'>','<', '=', '-', '+', '*', '/', '!', '%', '^', '&', '(', ')', '[', ']', '{', '}', ',', '.', ';', ':'};
+  unsigned char ops[]{'>','<', '=', '-', '+', '*', '/', '!', '%', '^', '&'};
+  unsigned char puns[]{'(', ')', '[', ']', '{', '}', ',', '.', ';', ':'};
   stateID* tr = tb[0];
   for(unsigned char c = 'a'; c <= 'z'; ++c)
     tr[c] = jrun::parser::ID;
@@ -21,9 +22,11 @@ static void initTable()
     tr[c] = jrun::parser::ID;
   for(unsigned char c = '0'; c <= '9'; ++c)
     tr[c] = jrun::parser::NUMBER;
-  tr['"'] = 7; 	tr['_'] = jrun::parser::ID; 	tr['\''] = 8;
-  for(auto c : chars)
-    tr[c] = jrun::parser::TEMP;
+  tr['"'] = TEMP1; 	tr['_'] = jrun::parser::ID; 	tr['\''] = TEMP2;
+  for(auto c : ops)
+    tr[c] = jrun::parser::OPERATOR;
+  for(auto c : puns)
+    tr[c] = jrun::parser::PUNCTURE;
   //tr['>'] = tr['<'] = tr['='] = tr['!'] = tr['+'] = tr['-'] = tr['*'] = tr['/'] = tr['%'] = tr['^'] = tr['&'] = jrun::parser::OPERATOR;
   //tr[','] = tr[';'] = tr['['] = tr[']'] = tr['{'] = tr['}'] = tr['('] = tr[')'] = jrun::parser::PUNCTURE;
   tr = tb[jrun::parser::ID];
@@ -37,34 +40,34 @@ static void initTable()
   tr = tb[jrun::parser::NUMBER];
   for(unsigned char c = '0'; c <= '9'; ++c)
     tr[c] = jrun::parser::NUMBER;
-  tr = tb[7];	//temp row for string
+  tr = tb[TEMP1];	//temp row for string
   for(unsigned char c = 0; c < 128; ++c)
-    tr[c] = 7;
+    tr[c] = TEMP1;
   tr['"'] = jrun::parser::STRING;
-  tr = tb[8];
+  tr = tb[TEMP2];
   for(unsigned char c = 0; c < 128; ++c)
-    tr[c] = 8;
+    tr[c] = TEMP2;
   tr['\''] = jrun::parser::STRING2;
-  tr = tb[jrun::parser::TEMP];
-  for(auto c : chars)
-    tr[c] = jrun::parser::TEMP;
+  tr = tb[jrun::parser::OPERATOR];
+  for(auto c : ops)
+    tr[c] = jrun::parser::OPERATOR;
   //tr['>'] = tr['<'] = tr['='] = tr['!'] = tr['+'] = tr['-'] = tr['*'] = tr['/'] = tr['%'] = tr['^'] = tr['&'] = tr['('] = tr[')'] = jrun::parser::OPERATOR;
 }
 
 static void initKeyTokens(std::map<std::string, tokenID>& m)
 {
-  m["function"] = jrun::parser::KEY_FUNCTION;
-  m["break"] = jrun::parser::KEY_BREAK;
-  m["for"] = jrun::parser::KEY_FOR;
-  m["while"] = jrun::parser::KEY_WHILE;
-  m["if"] = jrun::parser::KEY_IF;
-  m["else"] = jrun::parser::KEY_ELSE;
-  m["return"] = jrun::parser::KEY_RETURN;
+  m["function"] = jrun::parser::KEYS;
+  m["break"] = jrun::parser::KEYS;
+  m["for"] = jrun::parser::KEYS;
+  m["while"] = jrun::parser::KEYS;
+  m["if"] = jrun::parser::KEYS;
+  m["else"] = jrun::parser::KEYS;
+  m["return"] = jrun::parser::KEYS;
 }
 
 jrun::parser::Token::Token(tokenID idt, const char* start, const char* end) : id(idt), tok(std::string(start,end))
 {
-  if((id == jrun::parser::TEMP || id == jrun::parser::ID) && LexerState::keyTokens.count(tok) > 0)
+  if((id >= jrun::parser::KEYS || id == jrun::parser::ID) && LexerState::keyTokens.count(tok) > 0)
     id = LexerState::keyTokens[tok];
 }
 

@@ -22,6 +22,7 @@ set(CXX_FLAGS
  # -std=c++0x
  -rdynamic
  -std=c++11
+ -O2
  #-stdlib=libstdc++
  )
 

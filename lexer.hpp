@@ -13,18 +13,14 @@ namespace jrun{
     enum tokenIDs : stateID{      
       ID = 1,
       NUMBER,
-      STRING,
-      //OPERATOR,
+      STRING,      
       STRING2,
-      TEMP,
-      KEY_IF,
-      KEY_ELSE,
-      KEY_RETURN,
-      KEY_BREAK,
-      KEY_FOR,
-      KEY_WHILE,
-      KEY_FUNCTION,
-      KEYS
+      TEMP1,
+      TEMP2,
+      KEYS,	//user defined or special chars
+      OPERATOR,
+      PUNCTURE,
+      MIN_ID
     };
     struct Token{
       Token(tokenID idt, const char* start, const char* end);
@@ -39,7 +35,7 @@ namespace jrun{
       std::vector<TokenPtr> readAll();
       bool addTokenDef(std::string str);
       bool addTokenDef(std::string str, tokenID id);
-      static const tokenID maxID = KEYS;
+      static const tokenID maxID = MIN_ID;
       static std::map<std::string, tokenID> keyTokens;
     private:
       Token* read();	//be careful! it should delete after used
